@@ -7,8 +7,19 @@
 #include<linux/device.h>
 #include<linux/slab.h>
 #include<linux/uaccess.h>
+#include<linux/ioctl.h>
+
+#include "data-types.h"
 
 #define mem_size 1024
+
+// Define the ioctl code
+
+
+ #define WR_DATA _IOW('a', 'a', data_t*)
+ #define RD_DATA _IOR('a', 'b', data_t*)
+
+ static data_t val;
 
 dev_t dev = 0;
 static struct class *dev_class;
@@ -23,12 +34,15 @@ static int chr_release(struct inode *inode, struct file *file);
 static ssize_t chr_read(struct file *filp, char __user *buf, size_t len, loff_t *off);
 static ssize_t chr_write(struct file *filp, const char *buf, size_t len, loff_t *off);
 
+static long chr_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
+
 
 static struct file_operations fops = {
     .owner = THIS_MODULE,
     .read = chr_read,
     .write = chr_write,
     .open = chr_open,
+    .unlocked_ioctl = chr_ioctl,
     .release = chr_release,
 };
 
@@ -60,7 +74,21 @@ static ssize_t chr_write(struct file *filp, const char __user *buf, size_t len, 
     return len;
 }
 
-
+static long chr_ioctl(struct file *file, unsigned int cmd, unsigned long arg){
+    switch (cmd)
+    {
+    case WR_DATA:
+        copy_from_user(&val, (data_t*)arg, sizeof(val));
+        printk(KERN_INFO "val = %d - %d\n", val.num1, val.num2);
+        break;
+    case RD_DATA:
+        copy_to_user((data_t*)arg, &val, sizeof(val));
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
 
 
 static int __init chr_driver_init(void){
@@ -88,7 +116,7 @@ static int __init chr_driver_init(void){
     }
 
     // creating device 
-    if((device_create(dev_class,NULL,dev,NULL,"my_device")) == NULL){
+    if((device_create(dev_class,NULL,dev,NULL,"ioctl_device")) == NULL){
         printk(KERN_INFO"cannot create the device...\n");
         goto r_device;
     }

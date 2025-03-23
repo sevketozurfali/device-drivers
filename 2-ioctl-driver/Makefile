@@ -1,4 +1,5 @@
 obj-m := ioctl-driver.o
+obj-m += ioctl-driver-structure.o
 
 KDIR := /lib/modules/$(shell uname -r)/build
 PWD := $(shell pwd)

@@ -9,12 +9,13 @@
 #include<linux/uaccess.h>
 #include<linux/ioctl.h>
 
+#include "data-types.h"
 
 #define mem_size 1024
 
 // Define the ioctl code
- #define WR_DATA _IOW('a', 'a', int32_t*)
- #define RD_DATA _IOR('a', 'b', int32_t*)
+//  #define WR_DATA _IOW('a', 'a', int32_t*)
+//  #define RD_DATA _IOR('a', 'b', int32_t*)
 
  int32_t val = 0;
 
@@ -108,7 +109,7 @@ static int __init chr_driver_init(void){
     }
 
     //  creating struct class 
-    if((dev_class = class_create(THIS_MODULE,"my_class")) == NULL){
+    if((dev_class = class_create("my_class")) == NULL){
         printk(KERN_INFO"Cannot create struct device \n");
         goto r_class;
     }
