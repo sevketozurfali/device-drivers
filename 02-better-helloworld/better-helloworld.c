@@ -19,4 +19,3 @@ module_exit(my_exit);
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Sevket Ozurfali <sevketozurfali@gmail.com>");
 MODULE_DESCRIPTION("This is better of the helloworld module.");
-video 5:24
