@@ -7,8 +7,34 @@ static char text[64];
 
 static ssize_t my_read (struct file *filp, char __user *user_buf, size_t len, loff_t *off){
     int not_copied, delta, to_copy = (len + *off) < sizeof(text) ? len : (sizeof(text) - *off);
-    printk("hello_cdev - Read is called \n");
-    return 0;
+    pr_info("hello_cdev - Read is called \n");
+
+    if( *off >= sizeof(text)){
+        return 0;
+    }
+
+    not_copied = copy_to_user(user_buf, &text[*off], to_copy);
+    delta = to_copy - not_copied;
+
+    *off += delta;
+
+    return delta;
+}
+
+static ssize_t my_write (struct file *filp, const char __user *user_buf, size_t len, loff_t *off){
+    int not_copied, delta, to_copy = (len + *off) < sizeof(text) ? len : (sizeof(text) - *off);
+    pr_info("hello_cdev - Write is called, we want to write %ld bytes , but actually only copying %d bytes. The offset is %lld \n", len, to_copy, *off);
+    
+    if( *off >= sizeof(text)){
+        return 0;
+    }
+
+    not_copied = copy_from_user(&text[*off], user_buf, to_copy);
+    delta = to_copy - not_copied;
+
+    *off += delta;
+
+    return delta;
 }
 
 static int my_open (struct inode *inode, struct file *filp){
